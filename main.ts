@@ -1,11 +1,14 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, Menu, MenuItem } from 'electron';
+import { createTracing } from 'node:trace_events';
 import * as path from 'path';
 import * as url from 'url';
+import * as fs from 'fs';
 
 // Initialize remote module
 require('@electron/remote/main').initialize();
 
 let win: BrowserWindow = null;
+let config:JSON = null;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
@@ -18,19 +21,21 @@ function createWindow(): BrowserWindow {
   win = new BrowserWindow({
     x: 0,
     y: 0,
-    width: size.width,
-    height: size.height,
+    //width: size.width,
+    //height: size.height,
+    width: 500,
+    height: 500,
     webPreferences: {
       nodeIntegration: true,
       allowRunningInsecureContent: (serve) ? true : false,
       contextIsolation: false,  // false if you want to run 2e2 test with Spectron
-      enableRemoteModule : true // true if you want to run 2e2 test  with Spectron or use remote module in renderer context (ie. Angular)
+      enableRemoteModule: true // true if you want to run 2e2 test  with Spectron or use remote module in renderer context (ie. Angular)
     },
   });
-
+  initMenu();
   if (serve) {
 
-    win.webContents.openDevTools();
+    //win.webContents.openDevTools();
 
     require('electron-reload')(__dirname, {
       electron: require(`${__dirname}/node_modules/electron`)
@@ -56,11 +61,62 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
+function initMenu()
+{
+  var menu = Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [
+        { label: 'Load Config', click(){ loadConfig();} },
+        { label: 'Save Config', click(){ saveConfig();} },
+        { label: 'Exit',click(){app.quit();} }
+      ]
+    },
+    {
+      label: 'Videos',
+      submenu:[
+        { label: 'Spider Libraries', click(){spiderFiles(); }}
+      ]
+    }
+  ]);
+  Menu.setApplicationMenu(menu);
+}
+
+
+function saveConfig(): void {
+  //const fs = require('fs');
+  //const path = require('path');
+
+  console.log("Creating config.")
+  let config = {
+    filePaths: ["K:\\YoutubeDownload\\Music"]
+  };
+
+  fs.writeFileSync('MurdocConfig.json', JSON.stringify(config));
+}
+
+function loadConfig(): void {
+  //
+  let rawdata:Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
+  this.config = rawdata.toJSON();
+  console.log(this.config);
+}
+
+function spiderFiles():void{
+  let directories = this.config["filePaths"];
+  console.log("Config Paths: %s",directories);
+  fs.readdir(directories,(err,files)=>{
+    files.forEach(file =>{
+      console.log("filepath: %s")
+    });
+  });
+}
+
 try {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  // Added 400 ms to fix the black background issue while using transparent window. More detais at https://github.com/electron/electron/issues/15947
+  // Added 400 ms to fix the black background issue while using transparent window. More details at https://github.com/electron/electron/issues/15947
   app.on('ready', () => setTimeout(createWindow, 400));
 
   // Quit when all windows are closed.
