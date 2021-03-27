@@ -64,11 +64,12 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-function initIpcListener():void
-{
+function initIpcListener(): void {
   console.log('Setting IPC listeners');
-  ipcMain.on('init-ipc',(event, arg)=>{
-    initEvent= event;
+  ipcMain.on('init-ipc', (event, arg) => {
+    console.log('Heard from my home boy');
+    initEvent = event;
+    initEvent.reply('update-data','pong');
   })
 }
 
@@ -86,7 +87,9 @@ function initMenu() {
     {
       label: 'Videos',
       submenu: [
-        { label: 'Scan Files', click() { spiderFiles(); } }
+        { label: 'Scan Files', click() { spiderFiles(); } },
+        { label: 'ping', click() { callNG(); } },
+        { label: 'debug', click() {win.webContents.openDevTools();} }
       ]
     }
   ]);
@@ -108,8 +111,8 @@ function loadConfig(): void {
   console.log(mConfig);
 }
 
-function callNG():void{
-  initEvent.reply('update-data','farts');
+function callNG(): void {
+  initEvent.reply('update-data', 'farts');
 }
 
 function spiderFiles(): void {
@@ -118,7 +121,7 @@ function spiderFiles(): void {
     console.log('Config Paths: %s', directory);
     fs.readdir(directory, (err, files) => {
       files.forEach(file => {
-        console.log('Filepath: %s',file)
+        console.log('Filepath: %s', file)
       });
     });
   });

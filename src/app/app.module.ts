@@ -15,8 +15,10 @@ import { HomeModule } from './home/home.module';
 import { DetailModule } from './detail/detail.module';
 
 import { AppComponent } from './app.component';
-import { FilelistComponent } from './filelist/filelist.component';
-import { FileitemComponent } from './fileitem/fileitem.component';
+import { MainComponent } from './components/main/main.component';
+import { FileListComponent } from './components/file-list/file-list.component';
+import { FileItemComponent } from './components/file-item/file-item.component';
+import { FileSearchComponent } from './components/file-search/file-search.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
@@ -24,7 +26,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
 }
 
 @NgModule({
-  declarations: [AppComponent, FilelistComponent, FileitemComponent],
+  declarations: [AppComponent, MainComponent, FileListComponent, FileItemComponent, FileSearchComponent],
   imports: [
     BrowserModule,
     FormsModule,
