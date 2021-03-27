@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, Menu, MenuItem } from 'electron';
+import { app, BrowserWindow, screen, Menu, MenuItem, ipcMain } from 'electron';
 import { createTracing } from 'node:trace_events';
 import * as path from 'path';
 import * as url from 'url';
@@ -9,6 +9,7 @@ require('@electron/remote/main').initialize();
 
 let win: BrowserWindow = null;
 let mConfig: any = null;
+let initEvent: Electron.IpcMainEvent = null;
 
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
@@ -34,6 +35,7 @@ function createWindow(): BrowserWindow {
     },
   });
   initMenu();
+  initIpcListener();
   if (serve) {
 
     //win.webContents.openDevTools();
@@ -62,6 +64,15 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
+function initIpcListener():void
+{
+  console.log('Setting IPC listeners');
+  ipcMain.on('init-ipc',(event, arg)=>{
+    initEvent= event;
+  })
+}
+
+
 function initMenu() {
   var menu = Menu.buildFromTemplate([
     {
@@ -75,7 +86,7 @@ function initMenu() {
     {
       label: 'Videos',
       submenu: [
-        { label: 'Spider Libraries', click() { spiderFiles(); } }
+        { label: 'Scan Files', click() { spiderFiles(); } }
       ]
     }
   ]);
@@ -84,22 +95,21 @@ function initMenu() {
 
 
 function saveConfig(): void {
-  //const fs = require('fs');
-  //const path = require('path');
-
   console.log("Creating config.")
   mConfig = {
-    filePaths: ["K:\YoutubeDownload\Music"]
+    filePaths: ["K:\\YoutubeDownload\\Music"]
   };
-
   fs.writeFileSync(path.resolve(__dirname, 'MurdocConfig.json'), JSON.stringify(mConfig));
 }
 
 function loadConfig(): void {
-  //
   let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
   mConfig = JSON.parse(rawdata.toString());
   console.log(mConfig);
+}
+
+function callNG():void{
+  initEvent.reply('update-data','farts');
 }
 
 function spiderFiles(): void {
