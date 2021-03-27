@@ -8,7 +8,8 @@ import * as fs from 'fs';
 require('@electron/remote/main').initialize();
 
 let win: BrowserWindow = null;
-let config:JSON = null;
+let mConfig: any = null;
+
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
@@ -61,21 +62,20 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-function initMenu()
-{
+function initMenu() {
   var menu = Menu.buildFromTemplate([
     {
       label: 'File',
       submenu: [
-        { label: 'Load Config', click(){ loadConfig();} },
-        { label: 'Save Config', click(){ saveConfig();} },
-        { label: 'Exit',click(){app.quit();} }
+        { label: 'Load Config', click() { loadConfig(); } },
+        { label: 'Save Config', click() { saveConfig(); } },
+        { label: 'Exit', click() { app.quit(); } }
       ]
     },
     {
       label: 'Videos',
-      submenu:[
-        { label: 'Spider Libraries', click(){spiderFiles(); }}
+      submenu: [
+        { label: 'Spider Libraries', click() { spiderFiles(); } }
       ]
     }
   ]);
@@ -88,26 +88,28 @@ function saveConfig(): void {
   //const path = require('path');
 
   console.log("Creating config.")
-  let config = {
-    filePaths: ["K:\\YoutubeDownload\\Music"]
+  mConfig = {
+    filePaths: ["K:\YoutubeDownload\Music"]
   };
 
-  fs.writeFileSync('MurdocConfig.json', JSON.stringify(config));
+  fs.writeFileSync(path.resolve(__dirname, 'MurdocConfig.json'), JSON.stringify(mConfig));
 }
 
 function loadConfig(): void {
   //
-  let rawdata:Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
-  this.config = rawdata.toJSON();
-  console.log(this.config);
+  let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
+  mConfig = JSON.parse(rawdata.toString());
+  console.log(mConfig);
 }
 
-function spiderFiles():void{
-  let directories = this.config["filePaths"];
-  console.log("Config Paths: %s",directories);
-  fs.readdir(directories,(err,files)=>{
-    files.forEach(file =>{
-      console.log("filepath: %s")
+function spiderFiles(): void {
+  let directories = mConfig["filePaths"];
+  directories.forEach(directory => {
+    console.log('Config Paths: %s', directory);
+    fs.readdir(directory, (err, files) => {
+      files.forEach(file => {
+        console.log('Filepath: %s',file)
+      });
     });
   });
 }
