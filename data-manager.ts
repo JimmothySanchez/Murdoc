@@ -76,10 +76,10 @@ export class DataManager {
     GenerateThumb(inPath:string,thumbsDir:string){
         let outPath =  path.resolve(thumbsDir,path.parse(inPath).name+'.png')
         let options = {
-            thumbnailInterval: 30,
-            thumbnailsPerRow: 10,
-            thumbnailWidth:120,
-            thumbnailHeight:66
+            thumbnailCount: 25,
+            thumbnailsPerRow: 5,
+            thumbnailWidth:256,
+            thumbnailHeight:125
         };
         let thumbs:Thumbs = new Thumbs(options);
         thumbs.GenerateGalleryImage(inPath,outPath).then((status)=>{
