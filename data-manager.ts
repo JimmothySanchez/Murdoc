@@ -70,10 +70,11 @@ export class DataManager {
             //this.GenerateThumb(fileItem.FullPath,path.join(thumbsDir,fileItem.Name+'.png'));
         //});
         let fileItem = this._data.files[0];
-        this.GenerateThumb(fileItem.FullPath,path.join(thumbsDir,path.parse(fileItem.Name).name));
+        this.GenerateThumb(fileItem.FullPath,thumbsDir);
     }
 
-    GenerateThumb(inPath:string,outPath:string){
+    GenerateThumb(inPath:string,thumbsDir:string){
+        let outPath =  path.resolve(thumbsDir,path.parse(inPath).name+'.png')
         let options = {
             thumbnailInterval: 30,
             thumbnailsPerRow: 10,
