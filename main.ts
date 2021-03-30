@@ -1,8 +1,10 @@
 import { app, BrowserWindow, screen, Menu, MenuItem, ipcMain } from 'electron';
 import { createTracing } from 'node:trace_events';
+import { DataManager} from './data-manager';
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
+import { generate } from 'rxjs';
 
 // Initialize remote module
 require('@electron/remote/main').initialize();
@@ -10,6 +12,7 @@ require('@electron/remote/main').initialize();
 let win: BrowserWindow = null;
 let mConfig: any = null;
 let initEvent: Electron.IpcMainEvent = null;
+let _dataManager = new DataManager();
 
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
@@ -36,6 +39,7 @@ function createWindow(): BrowserWindow {
   });
   initMenu();
   initIpcListener();
+  loadConfig();
   if (serve) {
 
     //win.webContents.openDevTools();
@@ -88,7 +92,8 @@ function initMenu() {
       label: 'Videos',
       submenu: [
         { label: 'Scan Files', click() { spiderFiles(); } },
-        { label: 'ping', click() { callNG(); } },
+        { label: 'Save Data', click() { saveData(); } },
+        { label: 'Generate Thumbs', click(){_dataManager.GenerateThumbs(mConfig.thumbPath);}},
         { label: 'debug', click() {win.webContents.openDevTools();} }
       ]
     }
@@ -111,20 +116,17 @@ function loadConfig(): void {
   console.log(mConfig);
 }
 
-function callNG(): void {
-  initEvent.reply('update-data', 'farts');
-}
 
 function spiderFiles(): void {
   let directories = mConfig["filePaths"];
-  directories.forEach(directory => {
-    console.log('Config Paths: %s', directory);
-    fs.readdir(directory, (err, files) => {
-      files.forEach(file => {
-        console.log('Filepath: %s', file)
-      });
-    });
-  });
+  let updatePromise =_dataManager.SimpleScanDirectories(directories);
+  updatePromise.then((data=>{
+    initEvent.reply("update-data",data);
+  }));
+}
+
+function saveData():void {
+  _dataManager.SaveDataToDisk();
 }
 
 try {

@@ -3,6 +3,8 @@
       Murdoc
     </h1>
     <app-file-search></app-file-search>
-    <app-file-list></app-file-list>
+    <ul *ngIf="data">
+      <app-file-item *ngFor="let dataRecord of data.files" [dataRecord]="dataRecord"></app-file-item>
+    </ul>
     <button (click)="ping($event)">ping</button>
   </div>

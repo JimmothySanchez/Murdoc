@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-file-item',
@@ -6,11 +6,11 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./file-item.component.scss']
 })
 export class FileItemComponent implements OnInit {
-
+  @Input() dataRecord:any;
   constructor() { }
 
   ngOnInit(): void {
-    
+   console.log("I'm awake") 
   }
 
 }

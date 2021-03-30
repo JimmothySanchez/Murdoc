@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { ElectronService } from '../../core/services/electron/electron.service';
 import { FileSearchComponent } from '../file-search/file-search.component';
-import { FileListComponent } from '../file-list/file-list.component';
+import { FileItemComponent} from '../file-item/file-item.component'
+
 
 @Component({
   selector: 'app-main',
@@ -10,12 +11,16 @@ import { FileListComponent } from '../file-list/file-list.component';
   styleUrls: ['./main.component.scss']
 })
 export class MainComponent implements OnInit {
-
-  constructor(private router: Router, private electronService: ElectronService) {
+  data:any = null;
+  constructor(private router: Router, private electronService: ElectronService,private _cdr: ChangeDetectorRef ) {
     if (this.electronService.isElectron) {
       this.electronService.ipcRenderer.on('update-data', (event, arg) => {
-        console.log(arg);
+        console.log('Updating Data..')
+        this.data = arg;
+        console.log(this.data);
+        //this._cdr.detectChanges();
       });
+      this.electronService.ipcRenderer.send('init-ipc', 'ping');
     }
   }
 
