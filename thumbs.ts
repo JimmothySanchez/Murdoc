@@ -34,8 +34,8 @@ export class Thumbs {
 
   private _CleanUpTemporaryFiles(path:string):Promise<any> {
     return new Promise((resolve, reject) => {
-      fs.rmdir(path,()=>{
-
+      fs.rmdir(path,{recursive:true},()=>{
+        resolve('success');
       });
     });
   }
