@@ -4,7 +4,7 @@
     </h1>
     <app-file-search></app-file-search>
     <ul *ngIf="data">
-      <app-file-item *ngFor="let dataRecord of data.files" [dataRecord]="dataRecord"></app-file-item>
+      <app-file-item *ngFor="let dataRecord of data.Files" [dataRecord]="dataRecord"></app-file-item>
     </ul>
     <button (click)="ping($event)">ping</button>
   </div>

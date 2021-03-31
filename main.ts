@@ -92,7 +92,6 @@ function initMenu() {
       label: 'Videos',
       submenu: [
         { label: 'Scan Files', click() { spiderFiles(); } },
-        { label: 'Save Data', click() { saveData(); } },
         { label: 'Generate Thumbs', click(){_dataManager.GenerateThumbs(mConfig.thumbPath);}},
         { label: 'debug', click() {win.webContents.openDevTools();} }
       ]
@@ -125,9 +124,9 @@ function spiderFiles(): void {
   }));
 }
 
-function saveData():void {
-  _dataManager.SaveDataToDisk();
-}
+// function saveData():void {
+//   _dataManager.SaveDataToDisk();
+// }
 
 try {
   // This method will be called when Electron has finished
