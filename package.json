@@ -45,6 +45,7 @@
     "es6-promise-pool": "2.5.0",
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "2.1.2",
+    "guid-typescript": "1.0.9",
     "sharp": "0.27.2"
   },
   "devDependencies": {

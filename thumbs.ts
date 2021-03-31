@@ -5,6 +5,8 @@ import * as ffmpeg from 'ffmpeg';
 import * as sharp from 'sharp';
 import * as fluentmpeg from 'fluent-ffmpeg';
 import { resolve } from 'node:path';
+import { i_File, i_MainSchema } from './schemas';
+import { Guid } from "guid-typescript";
 
 export class Thumbs {
   thumbnailCount: Number;
@@ -105,15 +107,15 @@ export class Thumbs {
     });
   }
 
-  GenerateGalleryImage(sourcePath: string, thumbnailPath: string): Promise<any> {
+  GenerateGalleryImage(file:i_File,outPath:string): Promise<any> {
     return new Promise((resolve, reject) => {
-      let tempDirectory = path.resolve(__dirname, 'temp', path.parse(sourcePath).name);
+      let tempDirectory = path.resolve(__dirname, 'temp',  file.Id );
       //Make the directory
       this._MakeDirectory(tempDirectory).then((dirStatus) => {
         //Then generate temporary files
-        this._GenerateTempFiles(sourcePath, tempDirectory).then((fileNames) => {
+        this._GenerateTempFiles(file.FullPath, tempDirectory).then((fileNames) => {
           //Then generate merge image
-          this._CombineThumbs(fileNames,thumbnailPath).then((combineStatus)=>{
+          this._CombineThumbs(fileNames,outPath).then((combineStatus)=>{
             this._CleanUpTemporaryFiles(tempDirectory);
             resolve(combineStatus);
             //Then clean up
