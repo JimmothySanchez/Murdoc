@@ -11,8 +11,8 @@ import { performance } from 'perf_hooks';
 
 var PromisePool = require('es6-promise-pool')
 export class DataManager {
-    _data: i_MainSchema = { Files: [] };
-
+    private _data: i_MainSchema = { Files: [] };
+    private _safeToGenerate:boolean = true;
     constructor() {
         this.LoadFromDisk();
     }
@@ -35,16 +35,6 @@ export class DataManager {
         });
     }
 
-    // GetInfoFromFile(filePath: string, fileName: string, files: any[]) {
-    //     let probe = fluentmpeg.ffprobe(filePath, function (err, metadata) {
-    //         let item = { name: fileName, fullpath: filePath, metadata: metadata }
-    //         console.log('Filepath: %s', filePath);
-    //         console.log(metadata);
-    //         files.push(item);
-    //     });
-    //     return probe;
-    // }
-
     SaveDataToDisk() {
         fs.writeFileSync(path.resolve(__dirname, 'MurdocData.json'), JSON.stringify(this._data));
     }
@@ -58,6 +48,10 @@ export class DataManager {
             console.log('Failed to load data from disk.')
         }
     }
+     
+    StopGeneratingThumbs():void{
+        this._safeToGenerate=false;
+    }
 
     GenerateThumbs(thumbsDir: string) {
         let concurrentlimit = 3;
@@ -68,12 +62,13 @@ export class DataManager {
             thumbnailWidth: 256,
             thumbnailHeight: 125
         };
+        this._safeToGenerate = true;
         let thumbs: Thumbs = new Thumbs(options);
         //let files = this._GetFilesWithoutThumbs();
         let filesWithoutThumbs = this._data.Files.filter(x => x.ThumbPath === null||x.ThumbPath===undefined);
 
         let promisemaker = () => {
-            if (filesWithoutThumbs.length > 0) {
+            if (filesWithoutThumbs.length > 0&& this._safeToGenerate) {
                 return new Promise((resolve, reject) => {
                     let file: i_File = filesWithoutThumbs.pop();
                     let outPath = path.resolve(thumbsDir, file.Id.toString() + '.png')
@@ -100,5 +95,8 @@ export class DataManager {
         }, (error) => {
             console.log('Some promise rejected: ' + error.message)
         });
+    }
+    GetData():i_MainSchema{
+        return this._data;
     }
 }

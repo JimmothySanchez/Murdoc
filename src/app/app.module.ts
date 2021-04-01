@@ -19,6 +19,14 @@ import { MainComponent } from './components/main/main.component';
 import { FileListComponent } from './components/file-list/file-list.component';
 import { FileItemComponent } from './components/file-item/file-item.component';
 import { FileSearchComponent } from './components/file-search/file-search.component';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import {MatIconModule} from '@angular/material/icon';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { PreviewComponent } from './components/preview/preview.component';
+//Materials
+
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
@@ -26,7 +34,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
 }
 
 @NgModule({
-  declarations: [AppComponent, MainComponent, FileListComponent, FileItemComponent, FileSearchComponent],
+  declarations: [AppComponent, MainComponent, FileListComponent, FileItemComponent, FileSearchComponent, PreviewComponent],
   imports: [
     BrowserModule,
     FormsModule,
@@ -35,7 +43,12 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     SharedModule,
     HomeModule,
     DetailModule,
+    MatGridListModule,
     AppRoutingModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    BrowserAnimationsModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

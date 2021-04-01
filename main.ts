@@ -1,6 +1,6 @@
-import { app, BrowserWindow, screen, Menu, MenuItem, ipcMain } from 'electron';
+import { app, BrowserWindow, screen, Menu, MenuItem, ipcMain, protocol } from 'electron';
 import { createTracing } from 'node:trace_events';
-import { DataManager} from './data-manager';
+import { DataManager } from './data-manager';
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
@@ -32,6 +32,7 @@ function createWindow(): BrowserWindow {
     height: 500,
     webPreferences: {
       nodeIntegration: true,
+      webSecurity: false,
       allowRunningInsecureContent: (serve) ? true : false,
       contextIsolation: false,  // false if you want to run 2e2 test with Spectron
       enableRemoteModule: true // true if you want to run 2e2 test  with Spectron or use remote module in renderer context (ie. Angular)
@@ -71,9 +72,9 @@ function createWindow(): BrowserWindow {
 function initIpcListener(): void {
   console.log('Setting IPC listeners');
   ipcMain.on('init-ipc', (event, arg) => {
-    console.log('Heard from my home boy');
     initEvent = event;
-    initEvent.reply('update-data','pong');
+    //initEvent.reply('update-data','pong');
+    initEvent.reply("update-data", _dataManager.GetData());
   })
 }
 
@@ -92,8 +93,14 @@ function initMenu() {
       label: 'Videos',
       submenu: [
         { label: 'Scan Files', click() { spiderFiles(); } },
-        { label: 'Generate Thumbs', click(){_dataManager.GenerateThumbs(mConfig.thumbPath);}},
-        { label: 'debug', click() {win.webContents.openDevTools();} }
+        { label: 'Start Generating Thumbs', click() { _dataManager.GenerateThumbs(mConfig.thumbPath); } },
+        { label: 'Stop Generating Thumbs', click() { _dataManager.StopGeneratingThumbs(); } },
+      ]
+    },
+    {
+      label: 'Debug',
+      submenu: [
+        { label: 'Debug', click() { win.webContents.openDevTools(); } }
       ]
     }
   ]);
@@ -118,9 +125,9 @@ function loadConfig(): void {
 
 function spiderFiles(): void {
   let directories = mConfig["filePaths"];
-  let updatePromise =_dataManager.SimpleScanDirectories(directories);
-  updatePromise.then((data=>{
-    initEvent.reply("update-data",data);
+  let updatePromise = _dataManager.SimpleScanDirectories(directories);
+  updatePromise.then((data => {
+    initEvent.reply("update-data", data);
   }));
 }
 
@@ -133,7 +140,17 @@ try {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   // Added 400 ms to fix the black background issue while using transparent window. More details at https://github.com/electron/electron/issues/15947
-  app.on('ready', () => setTimeout(createWindow, 400));
+  app.on('ready', () => {
+    //Trying to get images to work
+    protocol.registerFileProtocol('file', (request, callback) => {
+      const pathname = decodeURI(request.url.replace('file:///', ''));
+      callback(pathname);
+    });
+
+
+
+    setTimeout(createWindow, 400)
+  });
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {

@@ -25,7 +25,7 @@
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "ng": "ng",
-    "start": "npm-run-all -p electron:serve ng:serve",
+    "start": "npm-run-all -p electron:serve --allow-file-access-from-files ng:serve",
     "build": "npm run electron:serve-tsc && ng build --base-href ./",
     "build:dev": "npm run build -- -c dev",
     "build:prod": "npm run build -- -c production",
@@ -41,6 +41,10 @@
     "lint": "ng lint"
   },
   "dependencies": {
+    "@angular/animations": "^11.0.0 || ^12.0.0-0",
+    "@angular/cdk": "11.2.6",
+    "@angular/forms": "^11.0.0 || ^12.0.0-0",
+    "@angular/material": "11.2.6",
     "@electron/remote": "1.0.4",
     "es6-promise-pool": "2.5.0",
     "ffmpeg": "0.0.4",

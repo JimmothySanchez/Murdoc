@@ -1,8 +1,8 @@
-<li>
-    <ol>
-        <li>
+<div class="item">
+    <!--  [style.background-image]="'url(file:///' + dataRecord.ThumbPath + ')'"  -->
+    <a (click)="Selected()">
+            <img src="file:///{{dataRecord.ThumbPath}}">
             Filename: {{dataRecord.Name}}
-        </li>
-        <li>FilePath:{{dataRecord.FullPath}}</li>
-    </ol>
-</li>
+    </a>
+
+</div>
