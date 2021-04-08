@@ -25,6 +25,9 @@ import { MatInputModule } from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PreviewComponent } from './components/preview/preview.component';
+import { SearchPipe } from './pipes/search.pipe';
+import { EditConfigComponent } from './components/edit-config/edit-config.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 //Materials
 
 
@@ -34,7 +37,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
 }
 
 @NgModule({
-  declarations: [AppComponent, MainComponent, FileListComponent, FileItemComponent, FileSearchComponent, PreviewComponent],
+  declarations: [AppComponent, MainComponent, FileListComponent, FileItemComponent, FileSearchComponent, PreviewComponent, SearchPipe, EditConfigComponent],
   imports: [
     BrowserModule,
     FormsModule,
@@ -49,6 +52,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     MatInputModule,
     MatIconModule,
     BrowserAnimationsModule,
+    MatProgressSpinnerModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

@@ -1,8 +1,9 @@
 <div class="item">
     <!--  [style.background-image]="'url(file:///' + dataRecord.ThumbPath + ')'"  -->
     <a (click)="Selected()">
-            <img src="file:///{{dataRecord.ThumbPath}}">
-            Filename: {{dataRecord.Name}}
+            <img *ngIf="dataRecord.ThumbPath!==null && dataRecord.ThumbPath!==undefined" src="file:///{{dataRecord.ThumbPath}}">
+            <mat-spinner *ngIf="dataRecord.GeneratingThumb"></mat-spinner>
+            <h3>{{dataRecord.Name}}</h3>
     </a>
 
 </div>

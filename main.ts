@@ -5,14 +5,16 @@ import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
 import { generate } from 'rxjs';
+import { i_Configuration } from './schemas';
 
 // Initialize remote module
 require('@electron/remote/main').initialize();
 
 let win: BrowserWindow = null;
-let mConfig: any = null;
+let mConfig: i_Configuration = null;
 let initEvent: Electron.IpcMainEvent = null;
-let _dataManager = new DataManager();
+let _dataManager:DataManager;
+
 
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
@@ -39,8 +41,14 @@ function createWindow(): BrowserWindow {
     },
   });
   initMenu();
-  initIpcListener();
   loadConfig();
+  _dataManager = new DataManager(mConfig,()=>{
+    initEvent.reply("update-data", _dataManager.GetData());
+  });
+  initIpcListener();
+  // _dataManager.GetDataEventPromise().then(()=>{
+  //   initEvent.reply("update-data", _dataManager.GetData());
+  // });
   if (serve) {
 
     //win.webContents.openDevTools();
@@ -73,7 +81,6 @@ function initIpcListener(): void {
   console.log('Setting IPC listeners');
   ipcMain.on('init-ipc', (event, arg) => {
     initEvent = event;
-    //initEvent.reply('update-data','pong');
     initEvent.reply("update-data", _dataManager.GetData());
   })
 }
@@ -92,8 +99,8 @@ function initMenu() {
     {
       label: 'Videos',
       submenu: [
-        { label: 'Scan Files', click() { spiderFiles(); } },
-        { label: 'Start Generating Thumbs', click() { _dataManager.GenerateThumbs(mConfig.thumbPath); } },
+        { label: 'Scan Files', click() { ScanDirectories(); } },
+        { label: 'Start Generating Thumbs', click() { _dataManager.GenerateThumbs(); } },
         { label: 'Stop Generating Thumbs', click() { _dataManager.StopGeneratingThumbs(); } },
       ]
     },
@@ -110,22 +117,19 @@ function initMenu() {
 
 function saveConfig(): void {
   console.log("Creating config.")
-  mConfig = {
-    filePaths: ["K:\\YoutubeDownload\\Music"]
-  };
   fs.writeFileSync(path.resolve(__dirname, 'MurdocConfig.json'), JSON.stringify(mConfig));
 }
 
 function loadConfig(): void {
   let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
-  mConfig = JSON.parse(rawdata.toString());
+  mConfig = <i_Configuration>JSON.parse(rawdata.toString());
   console.log(mConfig);
 }
 
 
-function spiderFiles(): void {
+function ScanDirectories(): void {
   let directories = mConfig["filePaths"];
-  let updatePromise = _dataManager.SimpleScanDirectories(directories);
+  let updatePromise = _dataManager.SimpleScanDirectories();
   updatePromise.then((data => {
     initEvent.reply("update-data", data);
   }));

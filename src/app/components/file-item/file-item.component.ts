@@ -14,7 +14,6 @@ export class FileItemComponent implements OnInit {
 
   Selected():void {
     this.SelectEvent.emit(this.dataRecord);
-    //this.electronService.shell.openPath(this.dataRecord.FullPath);
   }
 
   ngOnInit(): void {

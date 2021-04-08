@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, } from '@angular/core';
 
 @Component({
   selector: 'app-file-search',
@@ -6,10 +6,13 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./file-search.component.scss']
 })
 export class FileSearchComponent implements OnInit {
-
+  @Output() UpdateSearch = new EventEmitter<string>();
   constructor() { }
 
   ngOnInit(): void {
   }
 
+  UpdateText(newText:string):void{
+    this.UpdateSearch.emit(newText);
+  }
 }

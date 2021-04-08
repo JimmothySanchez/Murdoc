@@ -4,35 +4,74 @@ import * as fluentmpeg from 'fluent-ffmpeg';
 import * as path from 'path';
 import { resolve } from 'node:path';
 import { Thumbs } from './thumbs';
-import { Console } from 'node:console';
-import { i_File, i_MainSchema } from './schemas';
+import { Console, groupCollapsed } from 'node:console';
+import { i_Configuration, i_File, i_MainSchema } from './schemas';
 import { Guid } from "guid-typescript";
 import { performance } from 'perf_hooks';
 
 var PromisePool = require('es6-promise-pool')
 export class DataManager {
-    private _data: i_MainSchema = { Files: [] };
-    private _safeToGenerate:boolean = true;
-    constructor() {
+    private _data: i_MainSchema = { Files: [], TagOptions: [] };
+    private _safeToGenerate: boolean = true;
+    private _config: i_Configuration;
+    private _dataUpdater;
+    constructor(config: i_Configuration, Dataupdater) {
         this.LoadFromDisk();
+        this._config = config;
+        this._dataUpdater = Dataupdater;
     }
 
-    SimpleScanDirectories(directories: string[]): Promise<any> {
-        return new Promise((resolve, reject) => {
-            directories.forEach(directory => {
-                fs.readdir(directory, (err, files) => {
-                    files.forEach(file => {
-                        let fullPath = path.join(directory, file);
-                        if (this._data.Files.filter(x => x.FullPath === fullPath).length < 1) {
-                            console.log('adding %s to library',file);
-                            this._data.Files.push({ Name: file, FullPath: fullPath, Id: Guid.raw(), Tags: [] });
-                        }
-                    });
-                    this.SaveDataToDisk();
-                    resolve(this._data);
-                });
+    //tag every folder startign with initial directory and including initial directory
+    private _GenerateTags(fullPath: string): string[] {
+        let rtrnvals = []
+        let initialDirectory = this._config.filePaths.filter(x => fullPath.indexOf(x) !== -1)[0];
+        if (initialDirectory !== null && initialDirectory !== undefined) {
+            rtrnvals = fullPath.split(initialDirectory)[1].split(path.sep).filter(x => x !== '').slice(0, -1);
+            let initialparts = initialDirectory.split(path.sep);
+            rtrnvals.push(initialparts[initialparts.length - 1]);
+        }
+        return rtrnvals;
+    }
+
+    private async _getFiles(dir: string) {
+        let subdirs = await fs.promises.readdir(dir);
+        let files = await Promise.all(subdirs.map(async (subdir) => {
+            let res = path.resolve(dir, subdir);
+            return (await fs.promises.stat(res)).isDirectory() ? this._getFiles(res) : res;
+        }));
+        return files.reduce((a, f) => a.concat(f), []);
+    }
+
+
+    private _ScanDirRecursive(directoryPath: string, startingDirectory: string) {
+        let dirProms = [];
+        fs.promises.readdir(directoryPath).then(filenames => {
+            filenames.forEach(file => {
+                let fullPathToFile = path.join(directoryPath, file);
+                if (fs.lstatSync(fullPathToFile).isDirectory()) {
+                    dirProms.push(this._ScanDirRecursive(fullPathToFile, startingDirectory));
+                }
             });
         });
+    }
+
+    SimpleScanDirectories(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let scanProms = [];
+            this._config.filePaths.forEach(directory => {
+                scanProms.push(this._getFiles(directory));
+            });
+            Promise.all(scanProms).then(dirs => {
+                dirs.forEach(dir => {
+                    dir.forEach(filepath => {
+                        let fileTags = this._GenerateTags(filepath);
+                        this._data.Files.push({ Name: path.basename(filepath).split('.')[0], FullPath: filepath, Id: Guid.raw(), Tags: fileTags, GeneratingThumb: false });
+                    });
+                });
+                resolve(this._data);
+            });
+        });
+
     }
 
     SaveDataToDisk() {
@@ -48,12 +87,12 @@ export class DataManager {
             console.log('Failed to load data from disk.')
         }
     }
-     
-    StopGeneratingThumbs():void{
-        this._safeToGenerate=false;
+
+    StopGeneratingThumbs(): void {
+        this._safeToGenerate = false;
     }
 
-    GenerateThumbs(thumbsDir: string) {
+    GenerateThumbs() {
         let concurrentlimit = 3;
         let activegenerators = [];
         let options = {
@@ -64,22 +103,24 @@ export class DataManager {
         };
         this._safeToGenerate = true;
         let thumbs: Thumbs = new Thumbs(options);
-        //let files = this._GetFilesWithoutThumbs();
-        let filesWithoutThumbs = this._data.Files.filter(x => x.ThumbPath === null||x.ThumbPath===undefined);
+        let filesWithoutThumbs = this._data.Files.filter(x => x.ThumbPath === null || x.ThumbPath === undefined);
 
         let promisemaker = () => {
-            if (filesWithoutThumbs.length > 0&& this._safeToGenerate) {
+            if (filesWithoutThumbs.length > 0 && this._safeToGenerate) {
                 return new Promise((resolve, reject) => {
                     let file: i_File = filesWithoutThumbs.pop();
-                    let outPath = path.resolve(thumbsDir, file.Id.toString() + '.png')
+                    let outPath = path.resolve(this._config.thumbPath, file.Id.toString() + '.png')
                     console.log('Generating thumbs for %s', file.Name);
+                    file.GeneratingThumb = true;
+                    this._dataUpdater();
                     let startTime = performance.now();
                     thumbs.GenerateGalleryImage(file, outPath).then((status) => {
                         console.log('Finished generating thumbs for %s after %s ms', file.Name, performance.now() - startTime);
                         file.ThumbPath = outPath;
-                        let test = this._data.Files.find(x => x.Id === file.Id);
+                        file.GeneratingThumb = false;
+                        this._dataUpdater();
                         resolve(outPath);
-                    }).catch(err=>{
+                    }).catch(err => {
                         console.log(err);
                     });
                 });
@@ -96,7 +137,8 @@ export class DataManager {
             console.log('Some promise rejected: ' + error.message)
         });
     }
-    GetData():i_MainSchema{
+
+    GetData(): i_MainSchema {
         return this._data;
     }
 }

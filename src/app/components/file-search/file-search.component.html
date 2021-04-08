@@ -1,6 +1,6 @@
 <p>
     <mat-form-field appearance="outline">
         <mat-label>Search</mat-label>
-        <input matInput placeholder="">
+        <input class="search-text" matInput placeholder="" (input)="UpdateText($event.target.value)">
       </mat-form-field>
   </p>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-file-list',
@@ -6,10 +6,14 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./file-list.component.scss']
 })
 export class FileListComponent implements OnInit {
-
+  @Output() textUpdateEvent = new EventEmitter<string>();
   constructor() { }
 
   ngOnInit(): void {
+  }
+  
+  UpdateText(newText:string):void{
+
   }
 
 }

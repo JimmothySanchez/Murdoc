@@ -42,5 +42,9 @@
             "name": "Application Debug",
             "configurations": [ "Renderer", "Main" ]
         }
+    ],
+    "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
     ]
 }

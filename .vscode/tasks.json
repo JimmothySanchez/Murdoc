@@ -14,7 +14,10 @@
           "owner": "typescript",
           "source": "ts",
           "applyTo": "closedDocuments",
-          "fileLocation": ["relative", "${cwd}"],
+          "fileLocation": [
+            "relative",
+            "${cwd}"
+          ],
           "pattern": "$tsc",
           "background": {
             "activeOnStart": true,
@@ -36,7 +39,10 @@
           "owner": "typescript",
           "source": "ts",
           "applyTo": "closedDocuments",
-          "fileLocation": ["relative", "${cwd}"],
+          "fileLocation": [
+            "relative",
+            "${cwd}"
+          ],
           "pattern": "$tsc",
           "background": {
             "activeOnStart": true,
@@ -44,6 +50,13 @@
             "endsPattern": "^.*Compiled successfully.*"
           }
         }
+      },
+      {
+        "type": "npm",
+        "script": "dist",
+        "problemMatcher": [],
+        "label": "npm: dist",
+        "detail": "build"
       }
     ]
   }
