@@ -7,15 +7,20 @@ import { i_File } from '../../../schemas';
 })
 export class SearchPipe implements PipeTransform {
 
-  transform(items: any[], filter: i_File): unknown {
-    if (!items || !filter) {
+  transform(items: i_File[], pipeFilter: i_File): unknown {
+    let rtrnitems=items;
+    if (!items || !pipeFilter) {
       return items;
     }
-    if(filter.Name===null||filter.Name===""||filter.Name===undefined)
+    if(pipeFilter.Name!==null&&pipeFilter.Name!==""&&pipeFilter.Name!==undefined) 
     {
-      return items;
+      rtrnitems= rtrnitems.filter(item => item.Name.toUpperCase().indexOf(pipeFilter.Name.toUpperCase()) !== -1)
     }
-    return items.filter(item => item.Name.toUpperCase().indexOf(filter.Name.toUpperCase()) !== -1);
+    if(pipeFilter.Tags!==null&&pipeFilter.Tags!==undefined&&pipeFilter.Tags.length>=1)
+    {
+      rtrnitems = rtrnitems.filter(item => pipeFilter.Tags.every(filtTag=> item.Tags!==null&& item.Tags.length>=1&& item.Tags.includes(filtTag)));
+    } 
+    return rtrnitems;
   }
 
 }

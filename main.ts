@@ -123,7 +123,6 @@ function saveConfig(): void {
 function loadConfig(): void {
   let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
   mConfig = <i_Configuration>JSON.parse(rawdata.toString());
-  console.log(mConfig);
 }
 
 

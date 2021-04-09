@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
@@ -22,12 +22,17 @@ import { FileSearchComponent } from './components/file-search/file-search.compon
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import {MatIconModule} from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PreviewComponent } from './components/preview/preview.component';
 import { SearchPipe } from './pipes/search.pipe';
 import { EditConfigComponent } from './components/edit-config/edit-config.component';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TagsComponent } from './components/tags/tags.component';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatExpansionModule } from '@angular/material/expansion';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatSelectModule} from '@angular/material/select';
 //Materials
 
 
@@ -37,7 +42,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
 }
 
 @NgModule({
-  declarations: [AppComponent, MainComponent, FileListComponent, FileItemComponent, FileSearchComponent, PreviewComponent, SearchPipe, EditConfigComponent],
+  declarations: [AppComponent, MainComponent, FileListComponent, FileItemComponent, FileSearchComponent, PreviewComponent, SearchPipe, EditConfigComponent, TagsComponent],
   imports: [
     BrowserModule,
     FormsModule,
@@ -53,6 +58,11 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     MatIconModule,
     BrowserAnimationsModule,
     MatProgressSpinnerModule,
+    MatButtonToggleModule,
+    MatExpansionModule,
+    MatCheckboxModule,
+    MatSelectModule,
+    ReactiveFormsModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

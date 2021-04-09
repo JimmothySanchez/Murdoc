@@ -66,6 +66,8 @@ export class DataManager {
                     dir.forEach(filepath => {
                         let fileTags = this._GenerateTags(filepath);
                         this._data.Files.push({ Name: path.basename(filepath).split('.')[0], FullPath: filepath, Id: Guid.raw(), Tags: fileTags, GeneratingThumb: false });
+                        let uniqueTags = fileTags.filter(x=>{return this._data.TagOptions.indexOf(x)===-1 });
+                        this._data.TagOptions= this._data.TagOptions.concat(uniqueTags);
                     });
                 });
                 resolve(this._data);

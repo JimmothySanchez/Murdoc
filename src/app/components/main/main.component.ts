@@ -15,15 +15,13 @@ import { SearchPipe } from '../../pipes/search.pipe';
 })
 export class MainComponent implements OnInit {
   data: i_MainSchema = { Files: [] , TagOptions:[]};
-  fileFilter = { Name: "" };
+  fileFilter = { Name: "",Tags: [] };
   selectedFile: i_File;
 
   constructor(private router: Router, private electronService: ElectronService, private _cdr: ChangeDetectorRef) {
     if (this.electronService.isElectron) {
       this.electronService.ipcRenderer.on('update-data', (event, arg) => {
-        console.log('Updating Data..')
         this.data = arg;
-        console.log(this.data);
         this._cdr.detectChanges();
       });
       this.electronService.ipcRenderer.send('init-ipc', 'ping');
@@ -38,6 +36,11 @@ export class MainComponent implements OnInit {
   UpdateSelected(newSelected: i_File): void {
     this.selectedFile = newSelected;
     console.log("selected %s", this.selectedFile.Name);
+    this._cdr.detectChanges();
+  }
+
+  UpdateSearchTags(tags:string[]):void{
+    this.fileFilter.Tags = tags;
     this._cdr.detectChanges();
   }
 

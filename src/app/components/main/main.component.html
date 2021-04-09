@@ -12,7 +12,7 @@
       <app-file-search (UpdateSearch)="updateSearch($event)"></app-file-search>
     </mat-grid-tile>
     <mat-grid-tile [colspan]="10" [rowspan]="1">
-      <p *ngFor="let tag of data.TagOptions"> {{tag}} </p>
+      <app-tags [TagsList]="data.TagOptions" (UpdateSearchTags)="UpdateSearchTags($event);" ></app-tags>
     </mat-grid-tile>
     <mat-grid-tile [colspan]="2" [rowspan]="2" class="video-tile"
       *ngFor="let dataRecord of data.Files |search:fileFilter">
