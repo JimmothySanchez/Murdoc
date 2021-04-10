@@ -1,14 +1,44 @@
-<div>
-    <div>
-        <label>Scan Directories</label>
-        <input type="text">
-    </div>
-    <div>
-        <label>Thumb Directory</label>
-        <input type="text">
-    </div>
-    <div>
-        <label>Video Extensions</label>
-        <input type="text">
-    </div>
-</div>
+<mat-grid-list cols="6" rowHeight="100px">
+    <mat-grid-tile [colspan]="6" [rowspan]="1">
+        <mat-chip-list #chipList aria-label="tags">
+            <mat-chip *ngFor="let path of data.filePaths" [removable]="removable" (removed)="remove(path)">
+                {{path}}
+                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+            </mat-chip>
+        </mat-chip-list>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="6" [rowspan]="1">
+        <!--<label>Scan Directories</label>
+        <input type="file">-->
+        <button mat-button color="warn" (click)="addDirClick()">Add Dir</button>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="3" [rowspan]="1">
+        <button mat-button color="warn" (click)="setThumbClick()">Set Thumb Dir</button>
+        <!--<label>Thumb Directory</label>
+        <input type="file">-->
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="3" [rowspan]="1">
+        <p>Thumb Directory: {{data.thumbPath}}</p>
+    </mat-grid-tile>
+
+    <mat-grid-tile [colspan]="6" [rowspan]="1">
+        <mat-chip-list #chipList aria-label="Extensions">
+            <mat-chip *ngFor="let ext of data.videoExtensions" [removable]="removable" (removed)="removeExt(ext)">
+                {{ext}}
+                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+            </mat-chip>
+        </mat-chip-list>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="3" [rowspan]="1">
+        <input type="text" matInput  [ngModel]="extNew" (ngModelChange)="extNew = $event">
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="3" [rowspan]="1">
+        <button mat-button color="warn" (click)="addExtClick()">Add Extention</button>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="3" [rowspan]="1">
+        <button mat-button color="primary" (click)="onCloseClick()">Close</button>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="3" [rowspan]="1">
+        <button mat-button color="warn" (click)="onSaveClick()">Save</button>
+    </mat-grid-tile>
+</mat-grid-list>

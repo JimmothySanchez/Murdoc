@@ -38,10 +38,7 @@
     "test:watch": "ng test",
     "e2e": "npm run build:prod && cross-env TS_NODE_PROJECT='e2e/tsconfig.e2e.json' mocha --timeout 300000 --require ts-node/register e2e/**/*.e2e.ts",
     "version": "conventional-changelog -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
-    "lint": "ng lint",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "package-win": "electron-packager . Murdoc --overwrite --asar --platform=win32 --arch=ia32 --icon=build/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Murdoc\""
+    "lint": "ng lint"
   },
   "dependencies": {
     "@angular/animations": "^11.0.0 || ^12.0.0-0",
@@ -55,33 +52,6 @@
     "guid-typescript": "1.0.9",
     "path": "0.12.7",
     "sharp": "0.27.2"
-  },
-  "build": {
-    "appId": "murdoc",
-    "dmg": {
-      "contents": [
-        {
-          "x": 110,
-          "y": 150
-        },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    },
-    "win": {
-      "target": "NSIS",
-      "icon": "build/icon.ico"
-    }
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "11.1.1",

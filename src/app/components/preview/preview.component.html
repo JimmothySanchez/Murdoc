@@ -1,4 +1,4 @@
 <div>
     <h3>{{dataRecord.Name}}</h3>
-    <img src="file:///{{dataRecord.ThumbPath}}" (click)="LoadFile()">
+    <img *ngIf="dataRecord.ThumbPath!==null&&dataRecord.ThumbPath!==undefined&&dataRecord.ThumbPath!==''" src="file:///{{dataRecord.ThumbPath}}" (click)="LoadFile()">
 </div>

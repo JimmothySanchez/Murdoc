@@ -11,7 +11,7 @@ import { i_Configuration } from './schemas';
 require('@electron/remote/main').initialize();
 
 let win: BrowserWindow = null;
-let mConfig: i_Configuration = null;
+//let mConfig: i_Configuration = null;
 let initEvent: Electron.IpcMainEvent = null;
 let _dataManager:DataManager;
 
@@ -41,8 +41,8 @@ function createWindow(): BrowserWindow {
     },
   });
   initMenu();
-  loadConfig();
-  _dataManager = new DataManager(mConfig,()=>{
+  //loadConfig();
+  _dataManager = new DataManager(()=>{
     initEvent.reply("update-data", _dataManager.GetData());
   });
   initIpcListener();
@@ -82,7 +82,17 @@ function initIpcListener(): void {
   ipcMain.on('init-ipc', (event, arg) => {
     initEvent = event;
     initEvent.reply("update-data", _dataManager.GetData());
-  })
+  });
+
+  //config request
+  ipcMain.on('fe-request-config',(event, arg) => {
+    event.reply('be-send-config',_dataManager.GetConfig());
+  });
+
+  ipcMain.on('fe-update-config',(event, arg) => {
+    _dataManager.SetConfig(arg);
+    _dataManager.SaveConfig();
+  });
 }
 
 
@@ -116,27 +126,26 @@ function initMenu() {
 
 
 function saveConfig(): void {
-  console.log("Creating config.")
-  fs.writeFileSync(path.resolve(__dirname, 'MurdocConfig.json'), JSON.stringify(mConfig));
+ // console.log("Creating config.")
+  //fs.writeFileSync(path.resolve(__dirname, 'MurdocConfig.json'), JSON.stringify(mConfig));
+  _dataManager.SaveConfig();
 }
 
 function loadConfig(): void {
-  let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
-  mConfig = <i_Configuration>JSON.parse(rawdata.toString());
+  //let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
+ // mConfig = <i_Configuration>JSON.parse(rawdata.toString());
+ _dataManager.LoadConfig();
 }
 
 
 function ScanDirectories(): void {
-  let directories = mConfig["filePaths"];
+  let directories = _dataManager.GetConfig().filePaths;
   let updatePromise = _dataManager.SimpleScanDirectories();
   updatePromise.then((data => {
     initEvent.reply("update-data", data);
   }));
 }
 
-// function saveData():void {
-//   _dataManager.SaveDataToDisk();
-// }
 
 try {
   // This method will be called when Electron has finished

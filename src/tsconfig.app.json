@@ -10,7 +10,9 @@
     "main.ts",
     "polyfills.ts",
     "app/**/*.ts",
-    "environments/**/*.ts"
+    "environments/**/*.ts",
+    "data-manager.ts",
+    "thumbs.ts"
   ],
   "exclude": [
     "**/*.spec.ts"

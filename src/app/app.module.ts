@@ -30,9 +30,13 @@ import { EditConfigComponent } from './components/edit-config/edit-config.compon
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TagsComponent } from './components/tags/tags.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import {MatButtonModule} from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatPaginatorModule} from '@angular/material/paginator';
 //Materials
 
 
@@ -54,14 +58,18 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     MatGridListModule,
     AppRoutingModule,
     MatFormFieldModule,
+    MatChipsModule,
     MatInputModule,
     MatIconModule,
+    MatButtonModule,
     BrowserAnimationsModule,
     MatProgressSpinnerModule,
     MatButtonToggleModule,
     MatExpansionModule,
+    MatDialogModule,
     MatCheckboxModule,
     MatSelectModule,
+    MatPaginatorModule,
     ReactiveFormsModule,
     TranslateModule.forRoot({
       loader: {

@@ -1,15 +1,18 @@
 <div class="container">
   <mat-grid-list cols="10" rowHeight="100px">
-    <mat-grid-tile [style.background]=" pink" [colspan]="10" [rowspan]="1">
+    <mat-grid-tile [colspan]="2" [rowspan]="1">
       <h1 class="title">
         Murdoc
       </h1>
+    </mat-grid-tile>    
+    <mat-grid-tile [colspan]="6" [rowspan]="1">
+      <app-file-search (UpdateSearch)="updateSearch($event)"></app-file-search>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="2" [rowspan]="1">
+      <button mat-button color="accent" (click)="OpenSettings()">Settings</button>
     </mat-grid-tile>
     <mat-grid-tile *ngIf="selectedFile !== null &&  selectedFile !== undefined" [colspan]="10" [rowspan]="7">
       <app-preview [dataRecord]="selectedFile"></app-preview>
-    </mat-grid-tile>
-    <mat-grid-tile [colspan]="10" [rowspan]="1">
-      <app-file-search (UpdateSearch)="updateSearch($event)"></app-file-search>
     </mat-grid-tile>
     <mat-grid-tile [colspan]="10" [rowspan]="1">
       <app-tags [TagsList]="data.TagOptions" (UpdateSearchTags)="UpdateSearchTags($event);" ></app-tags>
@@ -17,6 +20,13 @@
     <mat-grid-tile [colspan]="2" [rowspan]="2" class="video-tile"
       *ngFor="let dataRecord of data.Files |search:fileFilter">
       <app-file-item [dataRecord]="dataRecord" (SelectEvent)="UpdateSelected($event);"></app-file-item>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="10" [rowspan]="1">
+      <mat-paginator [length]="data.Files.length"
+               [pageSize]="pageSize"
+               [pageSizeOptions]="pageSizeOptions"
+               (page)="onPage($event)">
+      </mat-paginator>
     </mat-grid-tile>
   </mat-grid-list>
 </div>

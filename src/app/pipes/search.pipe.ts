@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 import { i_File } from '../../../schemas';
 
 @Pipe({
@@ -7,7 +8,7 @@ import { i_File } from '../../../schemas';
 })
 export class SearchPipe implements PipeTransform {
 
-  transform(items: i_File[], pipeFilter: i_File): unknown {
+  transform(items: any[], pipeFilter: any): unknown {
     let rtrnitems=items;
     if (!items || !pipeFilter) {
       return items;
@@ -20,6 +21,11 @@ export class SearchPipe implements PipeTransform {
     {
       rtrnitems = rtrnitems.filter(item => pipeFilter.Tags.every(filtTag=> item.Tags!==null&& item.Tags.length>=1&& item.Tags.includes(filtTag)));
     } 
+    if(pipeFilter.Page!==null&&pipeFilter.Page!==undefined )
+    {
+  
+      rtrnitems= rtrnitems.slice(pipeFilter.Page.pageSize*pipeFilter.Page.pageIndex,pipeFilter.Page.pageSize*(pipeFilter.Page.pageIndex+1))
+    }
     return rtrnitems;
   }
 

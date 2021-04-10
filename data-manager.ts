@@ -15,9 +15,9 @@ export class DataManager {
     private _safeToGenerate: boolean = true;
     private _config: i_Configuration;
     private _dataUpdater;
-    constructor(config: i_Configuration, Dataupdater) {
+    constructor( Dataupdater) {
+        this.LoadConfig();
         this.LoadFromDisk();
-        this._config = config;
         this._dataUpdater = Dataupdater;
     }
 
@@ -55,6 +55,17 @@ export class DataManager {
         });
     }
 
+    SaveConfig(): void {
+        console.log("Creating config.")
+        fs.writeFileSync(path.resolve(__dirname, 'MurdocConfig.json'), JSON.stringify(this._config));
+    }
+
+    LoadConfig(): void {
+        let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
+        this._config = <i_Configuration>JSON.parse(rawdata.toString());
+    }
+
+
     SimpleScanDirectories(): Promise<any> {
         return new Promise((resolve, reject) => {
             let scanProms = [];
@@ -64,10 +75,13 @@ export class DataManager {
             Promise.all(scanProms).then(dirs => {
                 dirs.forEach(dir => {
                     dir.forEach(filepath => {
-                        let fileTags = this._GenerateTags(filepath);
-                        this._data.Files.push({ Name: path.basename(filepath).split('.')[0], FullPath: filepath, Id: Guid.raw(), Tags: fileTags, GeneratingThumb: false });
-                        let uniqueTags = fileTags.filter(x=>{return this._data.TagOptions.indexOf(x)===-1 });
-                        this._data.TagOptions= this._data.TagOptions.concat(uniqueTags);
+                        if(this._data.Files.findIndex(x=> x.FullPath ===filepath)===-1 && this._config.videoExtensions.includes(path.extname(filepath) ))
+                        {
+                            let fileTags = this._GenerateTags(filepath);
+                            this._data.Files.push({ Name: path.basename(filepath).split('.')[0], FullPath: filepath, Id: Guid.raw(), Tags: fileTags, GeneratingThumb: false });
+                            let uniqueTags = fileTags.filter(x => { return this._data.TagOptions.indexOf(x) === -1 });
+                            this._data.TagOptions = this._data.TagOptions.concat(uniqueTags);
+                        }
                     });
                 });
                 resolve(this._data);
@@ -142,5 +156,13 @@ export class DataManager {
 
     GetData(): i_MainSchema {
         return this._data;
+    }
+
+    GetConfig(): i_Configuration {
+        return this._config;
+    }
+
+    SetConfig(config: i_Configuration): void {
+        this._config = config;
     }
 }
