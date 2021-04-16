@@ -11,13 +11,16 @@ import { EditConfigComponent } from '../edit-config/edit-config.component';
 import { PageEvent } from '@angular/material/paginator';
 
 
+
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss']
 })
 export class MainComponent implements OnInit {
+  _datastore: any;
   data: i_MainSchema = { Files: [], TagOptions: [] };
+  //data:any;
   // MatPaginator Inputs
   length = 100;
   pageSize = 10;
@@ -32,8 +35,15 @@ export class MainComponent implements OnInit {
   constructor(private router: Router, private electronService: ElectronService, public dialog: MatDialog, private _cdr: ChangeDetectorRef) {
     if (this.electronService.isElectron) {
       this.electronService.ipcRenderer.on('update-data', (event, arg) => {
-        this.data = arg;
+        console.log("Updating Data");
+        console.log(arg[0]);
+        console.log(arg[1]);
+        this.data.Files = arg[0];
+        this.data.TagOptions= arg[1];
         this._cdr.detectChanges();
+      });
+      this.electronService.ipcRenderer.on('log', (event, arg) => {
+        console.log(arg);
       });
       this.electronService.ipcRenderer.send('init-ipc', 'ping');
     }

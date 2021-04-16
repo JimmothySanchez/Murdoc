@@ -30,8 +30,8 @@ function createWindow(): BrowserWindow {
     y: 0,
     //width: size.width,
     //height: size.height,
-    width: 500,
-    height: 500,
+    width: 1000,
+    height: 1000,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false,
@@ -43,7 +43,9 @@ function createWindow(): BrowserWindow {
   initMenu();
   //loadConfig();
   _dataManager = new DataManager(()=>{
-    initEvent.reply("update-data", _dataManager.GetData());
+    Promise.all([_dataManager.GetAllData(),_dataManager.GetAllTags()]).then(results=>{
+      initEvent.reply("update-data", results);
+    });
   });
   initIpcListener();
   // _dataManager.GetDataEventPromise().then(()=>{
@@ -81,7 +83,11 @@ function initIpcListener(): void {
   console.log('Setting IPC listeners');
   ipcMain.on('init-ipc', (event, arg) => {
     initEvent = event;
-    initEvent.reply("update-data", _dataManager.GetData());
+    Promise.all([_dataManager.GetAllData(),_dataManager.GetAllTags()]).then(results=>{
+      initEvent.reply("update-data", results);
+    });
+    initEvent.reply("log","Exec path : "+ path.dirname (app.getPath ('exe')));
+    initEvent.reply("log","Portable Location: "+ process.env.PORTABLE_EXECUTABLE_DIR)
   });
 
   //config request
@@ -142,7 +148,9 @@ function ScanDirectories(): void {
   let directories = _dataManager.GetConfig().filePaths;
   let updatePromise = _dataManager.SimpleScanDirectories();
   updatePromise.then((data => {
-    initEvent.reply("update-data", data);
+    Promise.all([_dataManager.GetAllData(),_dataManager.GetAllTags()]).then(results=>{
+      initEvent.reply("update-data", results);
+    });
   }));
 }
 

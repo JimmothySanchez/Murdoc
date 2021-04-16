@@ -8,16 +8,20 @@ import { Console, groupCollapsed } from 'node:console';
 import { i_Configuration, i_File, i_MainSchema } from './schemas';
 import { Guid } from "guid-typescript";
 import { performance } from 'perf_hooks';
+//import {Datastore} from 'nedb-promises';
+const Datastore = require('nedb-promises');
 
 var PromisePool = require('es6-promise-pool')
 export class DataManager {
-    private _data: i_MainSchema = { Files: [], TagOptions: [] };
     private _safeToGenerate: boolean = true;
     private _config: i_Configuration;
+    private _dataStore: any;
     private _dataUpdater;
-    constructor( Dataupdater) {
+    private _root: string;
+    constructor(Dataupdater) {
+        this._setRoot();
         this.LoadConfig();
-        this.LoadFromDisk();
+        this.LoadDb();
         this._dataUpdater = Dataupdater;
     }
 
@@ -42,27 +46,30 @@ export class DataManager {
         return files.reduce((a, f) => a.concat(f), []);
     }
 
-
-    private _ScanDirRecursive(directoryPath: string, startingDirectory: string) {
-        let dirProms = [];
-        fs.promises.readdir(directoryPath).then(filenames => {
-            filenames.forEach(file => {
-                let fullPathToFile = path.join(directoryPath, file);
-                if (fs.lstatSync(fullPathToFile).isDirectory()) {
-                    dirProms.push(this._ScanDirRecursive(fullPathToFile, startingDirectory));
-                }
-            });
-        });
+    private _setRoot(): void {
+        if (process.env.PORTABLE_EXECUTABLE_DIR !== null && process.env.PORTABLE_EXECUTABLE_DIR !== undefined) {
+            this._root = process.env.PORTABLE_EXECUTABLE_DIR;
+        }
+        else {
+            this._root = __dirname;
+        }
+        console.log(this._root);
     }
+
 
     SaveConfig(): void {
         console.log("Creating config.")
-        fs.writeFileSync(path.resolve(__dirname, 'MurdocConfig.json'), JSON.stringify(this._config));
+        fs.writeFileSync(path.resolve(this._root, 'MurdocConfig.json'), JSON.stringify(this._config));
     }
 
     LoadConfig(): void {
-        let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
-        this._config = <i_Configuration>JSON.parse(rawdata.toString());
+        try {
+            let rawdata: Buffer = fs.readFileSync(path.resolve(this._root, 'MurdocConfig.json'));
+            this._config = <i_Configuration>JSON.parse(rawdata.toString());
+        } catch (exception) {
+            console.log("Could not find configuration. Making one instead.");
+            this._config = { filePaths: [], thumbPath: "", videoExtensions: [] };
+        }
     }
 
 
@@ -73,34 +80,38 @@ export class DataManager {
                 scanProms.push(this._getFiles(directory));
             });
             Promise.all(scanProms).then(dirs => {
+                let insProms = [];
+                let findProms =[];
                 dirs.forEach(dir => {
                     dir.forEach(filepath => {
-                        if(this._data.Files.findIndex(x=> x.FullPath ===filepath)===-1 && this._config.videoExtensions.includes(path.extname(filepath) ))
-                        {
-                            let fileTags = this._GenerateTags(filepath);
-                            this._data.Files.push({ Name: path.basename(filepath).split('.')[0], FullPath: filepath, Id: Guid.raw(), Tags: fileTags, GeneratingThumb: false });
-                            let uniqueTags = fileTags.filter(x => { return this._data.TagOptions.indexOf(x) === -1 });
-                            this._data.TagOptions = this._data.TagOptions.concat(uniqueTags);
+                        //if is a valid extension
+                        if (this._config.videoExtensions.includes(path.extname(filepath))) {
+                            //if not already added
+                            findProms.push(this._dataStore.find({ FullPath: filepath }).then(existingrecords => {
+                                if (existingrecords.length <= 0) {
+                                    //add recod to db
+                                    let fileTags = this._GenerateTags(filepath);
+                                    insProms.push(this._dataStore.insert({ Name: path.basename(filepath).split('.')[0], FullPath: filepath, Id: Guid.raw(), Tags: fileTags, GeneratingThumb: false }));
+                                }
+                            }));
                         }
                     });
                 });
-                resolve(this._data);
+                Promise.all(findProms).then(finds=>{
+                    Promise.all(insProms).then(results=>{
+                        resolve("scanning done.");  
+                    });
+                });
             });
         });
 
     }
 
-    SaveDataToDisk() {
-        fs.writeFileSync(path.resolve(__dirname, 'MurdocData.json'), JSON.stringify(this._data));
-    }
-
-    LoadFromDisk() {
+    LoadDb() {
         try {
-            let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocData.json'));
-            this._data = <i_MainSchema>JSON.parse(rawdata.toString());
-            let crapvar = "";
-        } catch (error) {
-            console.log('Failed to load data from disk.')
+            this._dataStore = Datastore.create(this.GetDBPath());
+        } catch (exception) {
+            console.log("Could not load db");
         }
     }
 
@@ -108,7 +119,36 @@ export class DataManager {
         this._safeToGenerate = false;
     }
 
-    GenerateThumbs() {
+    GetDBPath(): string {
+        return path.resolve(this._root, 'MurdocData.db');
+    }
+
+    QueryData(queryFilter) {
+        return this._dataStore.find(queryFilter);
+    }
+
+    GetAllData() {
+        return this._dataStore.find();
+    }
+
+    //this is gross but there is no distinct in nedb
+    GetAllTags() {
+        return new Promise((resolve, reject) => {
+            this._dataStore.find().then(results => {
+                let uniques: string[] = [];
+                results.forEach(result => {
+                    result.Tags.forEach(tag => {
+                        if (!uniques.includes(tag)) {
+                            uniques.push(tag);
+                        } 
+                    });
+                });
+                resolve(uniques);
+            });
+        });
+    }
+
+    async GenerateThumbs() {
         let concurrentlimit = 3;
         let activegenerators = [];
         let options = {
@@ -119,8 +159,11 @@ export class DataManager {
         };
         this._safeToGenerate = true;
         let thumbs: Thumbs = new Thumbs(options);
-        let filesWithoutThumbs = this._data.Files.filter(x => x.ThumbPath === null || x.ThumbPath === undefined);
+        //let filesWithoutThumbs = this._data.Files.filter(x => x.ThumbPath === null || x.ThumbPath === undefined);
+        //let filesWithoutThumbs=[];
+        let filesWithoutThumbs = await this._dataStore.find({ ThumbPath: { $exists: false } });
 
+        //TODO: now that I'm using a db this can be cleaaned up alot
         let promisemaker = () => {
             if (filesWithoutThumbs.length > 0 && this._safeToGenerate) {
                 return new Promise((resolve, reject) => {
@@ -128,13 +171,16 @@ export class DataManager {
                     let outPath = path.resolve(this._config.thumbPath, file.Id.toString() + '.png')
                     console.log('Generating thumbs for %s', file.Name);
                     file.GeneratingThumb = true;
+                    this._dataStore.update({ Id: file.Id }, file, { upsert: true });
                     this._dataUpdater();
                     let startTime = performance.now();
-                    thumbs.GenerateGalleryImage(file, outPath).then((status) => {
+                    let temporaryDir = path.resolve(this._root, 'temp', file.Id);
+                    thumbs.GenerateGalleryImage(file, outPath, temporaryDir).then((status) => {
                         console.log('Finished generating thumbs for %s after %s ms', file.Name, performance.now() - startTime);
                         file.ThumbPath = outPath;
                         file.GeneratingThumb = false;
                         this._dataUpdater();
+                        this._dataStore.update({ Id: file.Id }, file, { upsert: true });
                         resolve(outPath);
                     }).catch(err => {
                         console.log(err);
@@ -148,14 +194,16 @@ export class DataManager {
         var poolPromise = pool.start();
         poolPromise.then(() => {
             console.log('All thmbs generated');
-            this.SaveDataToDisk();
+            //this.SaveDataToDisk();
         }, (error) => {
             console.log('Some promise rejected: ' + error.message)
         });
     }
 
-    GetData(): i_MainSchema {
-        return this._data;
+    GetData(): any {
+        //return this._data;
+        //TODO: return db vals
+        return null;
     }
 
     GetConfig(): i_Configuration {

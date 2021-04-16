@@ -107,9 +107,9 @@ export class Thumbs {
     });
   }
 
-  GenerateGalleryImage(file:i_File,outPath:string): Promise<any> {
+  GenerateGalleryImage(file:i_File,outPath:string,tempDirectory:string): Promise<any> {
     return new Promise((resolve, reject) => {
-      let tempDirectory = path.resolve(__dirname, 'temp',  file.Id );
+      //let tempDirectory = path.resolve(__dirname, 'temp',  file.Id );
       //Make the directory
       this._MakeDirectory(tempDirectory).then((dirStatus) => {
         //Then generate temporary files
