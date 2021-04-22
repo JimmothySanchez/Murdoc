@@ -56,6 +56,9 @@ export class DataManager {
         console.log(this._root);
     }
 
+    private _getFileName(filepath):string{
+        return path.basename(filepath).split('.').slice(0,-1).join('.');
+    }
 
     SaveConfig(): void {
         console.log("Creating config.")
@@ -68,10 +71,18 @@ export class DataManager {
             this._config = <i_Configuration>JSON.parse(rawdata.toString());
         } catch (exception) {
             console.log("Could not find configuration. Making one instead.");
-            this._config = { filePaths: [], thumbPath: "", videoExtensions: [] };
+            this._config = { filePaths: [], thumbPath: "", videoExtensions: [] ,simultaneousGenCount:3};
         }
     }
 
+    FixNames():void{
+        this._dataStore.find().then(files=>{
+            files.forEach(file => {
+                file.Name =this._getFileName(file.FullPath);
+                this._dataStore.update({ Id: file.Id }, file, { upsert: true });
+            });
+        });
+    }
 
     SimpleScanDirectories(): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -91,7 +102,7 @@ export class DataManager {
                                 if (existingrecords.length <= 0) {
                                     //add recod to db
                                     let fileTags = this._GenerateTags(filepath);
-                                    insProms.push(this._dataStore.insert({ Name: path.basename(filepath).split('.')[0], FullPath: filepath, Id: Guid.raw(), Tags: fileTags, GeneratingThumb: false }));
+                                    insProms.push(this._dataStore.insert({ Name: this._getFileName(filepath), FullPath: filepath, Id: Guid.raw(), Tags: fileTags, GeneratingThumb: false }));
                                 }
                             }));
                         }
@@ -149,7 +160,6 @@ export class DataManager {
     }
 
     async GenerateThumbs() {
-        let concurrentlimit = 3;
         let activegenerators = [];
         let options = {
             thumbnailCount: 25,
@@ -190,7 +200,7 @@ export class DataManager {
             return null;
         };
 
-        var pool = new PromisePool(promisemaker, concurrentlimit);
+        var pool = new PromisePool(promisemaker, this._config.simultaneousGenCount);
         var poolPromise = pool.start();
         poolPromise.then(() => {
             console.log('All thmbs generated');

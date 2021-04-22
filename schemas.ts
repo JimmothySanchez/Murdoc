@@ -18,4 +18,5 @@ export interface i_Configuration{
     filePaths:string[];
     thumbPath:string;
     videoExtensions:string[];
+    simultaneousGenCount:number;
 }

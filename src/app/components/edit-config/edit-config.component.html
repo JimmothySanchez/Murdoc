@@ -30,6 +30,13 @@
         </mat-chip-list>
     </mat-grid-tile>
     <mat-grid-tile [colspan]="3" [rowspan]="1">
+        Simultaneous Thumbnail Gen Count:
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]="3" [rowspan]="1">
+        <input type="text" matInput  [ngModel]="data.simultaneousGenCount" (ngModelChange)="data.simultaneousGenCount = $event">
+    </mat-grid-tile>
+
+    <mat-grid-tile [colspan]="3" [rowspan]="1">
         <input type="text" matInput  [ngModel]="extNew" (ngModelChange)="extNew = $event">
     </mat-grid-tile>
     <mat-grid-tile [colspan]="3" [rowspan]="1">

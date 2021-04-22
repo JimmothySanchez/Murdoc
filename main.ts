@@ -35,22 +35,21 @@ function createWindow(): BrowserWindow {
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false,
+      nodeIntegrationInWorker: true,
       allowRunningInsecureContent: (serve) ? true : false,
       contextIsolation: false,  // false if you want to run 2e2 test with Spectron
       enableRemoteModule: true // true if you want to run 2e2 test  with Spectron or use remote module in renderer context (ie. Angular)
     },
   });
   initMenu();
-  //loadConfig();
+
   _dataManager = new DataManager(()=>{
     Promise.all([_dataManager.GetAllData(),_dataManager.GetAllTags()]).then(results=>{
       initEvent.reply("update-data", results);
     });
   });
   initIpcListener();
-  // _dataManager.GetDataEventPromise().then(()=>{
-  //   initEvent.reply("update-data", _dataManager.GetData());
-  // });
+
   if (serve) {
 
     //win.webContents.openDevTools();
@@ -107,8 +106,6 @@ function initMenu() {
     {
       label: 'File',
       submenu: [
-        { label: 'Load Config', click() { loadConfig(); } },
-        { label: 'Save Config', click() { saveConfig(); } },
         { label: 'Exit', click() { app.quit(); } }
       ]
     },
@@ -116,6 +113,7 @@ function initMenu() {
       label: 'Videos',
       submenu: [
         { label: 'Scan Files', click() { ScanDirectories(); } },
+        { label: 'Fix Names', click() { _dataManager.FixNames(); } },
         { label: 'Start Generating Thumbs', click() { _dataManager.GenerateThumbs(); } },
         { label: 'Stop Generating Thumbs', click() { _dataManager.StopGeneratingThumbs(); } },
       ]
@@ -132,14 +130,10 @@ function initMenu() {
 
 
 function saveConfig(): void {
- // console.log("Creating config.")
-  //fs.writeFileSync(path.resolve(__dirname, 'MurdocConfig.json'), JSON.stringify(mConfig));
   _dataManager.SaveConfig();
 }
 
 function loadConfig(): void {
-  //let rawdata: Buffer = fs.readFileSync(path.resolve(__dirname, 'MurdocConfig.json'));
- // mConfig = <i_Configuration>JSON.parse(rawdata.toString());
  _dataManager.LoadConfig();
 }
 
