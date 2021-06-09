@@ -18,11 +18,11 @@
       <app-tags [TagsList]="data.TagOptions" (UpdateSearchTags)="UpdateSearchTags($event);" ></app-tags>
     </mat-grid-tile>
     <mat-grid-tile [colspan]="2" [rowspan]="2" class="video-tile"
-      *ngFor="let dataRecord of data.Files |search:fileFilter">
+      *ngFor="let dataRecord of data.Files">
       <app-file-item [dataRecord]="dataRecord" (SelectEvent)="UpdateSelected($event);"></app-file-item>
     </mat-grid-tile>
     <mat-grid-tile [colspan]="10" [rowspan]="1">
-      <mat-paginator [length]="data.Files.length"
+      <mat-paginator [length]="length"
                [pageSize]="pageSize"
                [pageSizeOptions]="pageSizeOptions"
                (page)="onPage($event)">

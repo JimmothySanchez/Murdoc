@@ -44,9 +44,7 @@ function createWindow(): BrowserWindow {
   initMenu();
 
   _dataManager = new DataManager(()=>{
-    Promise.all([_dataManager.GetAllData(),_dataManager.GetAllTags()]).then(results=>{
-      initEvent.reply("update-data", results);
-    });
+      initEvent.reply("update-data");
   });
   initIpcListener();
 
@@ -82,11 +80,9 @@ function initIpcListener(): void {
   console.log('Setting IPC listeners');
   ipcMain.on('init-ipc', (event, arg) => {
     initEvent = event;
-    Promise.all([_dataManager.GetAllData(),_dataManager.GetAllTags()]).then(results=>{
-      initEvent.reply("update-data", results);
-    });
     initEvent.reply("log","Exec path : "+ path.dirname (app.getPath ('exe')));
     initEvent.reply("log","Portable Location: "+ process.env.PORTABLE_EXECUTABLE_DIR)
+    initEvent.reply("update-data");
   });
 
   //config request
@@ -97,6 +93,19 @@ function initIpcListener(): void {
   ipcMain.on('fe-update-config',(event, arg) => {
     _dataManager.SetConfig(arg);
     _dataManager.SaveConfig();
+  });
+
+  ipcMain.on('query-data',(event,arg)=>{
+    _dataManager.QueryData(arg).then(results=>{
+      initEvent.reply("query-return",results);
+    });
+  });
+
+  
+  ipcMain.on('query-tags',(event,arg)=>{
+    _dataManager.GetAllTags().then(results=>{
+      initEvent.reply("tags-return",results);
+    });
   });
 }
 
@@ -142,9 +151,7 @@ function ScanDirectories(): void {
   let directories = _dataManager.GetConfig().filePaths;
   let updatePromise = _dataManager.SimpleScanDirectories();
   updatePromise.then((data => {
-    Promise.all([_dataManager.GetAllData(),_dataManager.GetAllTags()]).then(results=>{
-      initEvent.reply("update-data", results);
-    });
+      initEvent.reply("update-data");
   }));
 }
 

@@ -135,7 +135,19 @@ export class DataManager {
     }
 
     QueryData(queryFilter) {
-        return this._dataStore.find(queryFilter);
+        let crapvar= "";
+        let mongoFilter:any = {
+            Name: new RegExp(queryFilter.Name)
+        };
+        if(queryFilter.Tags.length>0)
+        {
+            mongoFilter.Tags = {$in: queryFilter.Tags}
+        }
+        let qskip = queryFilter.Page.pageSize*queryFilter.Page.pageIndex;
+        let qlimit = queryFilter.Page.pageSize;
+        //mongoFilter.
+        let rtrndata = this._dataStore.find(mongoFilter).sort({Name:1}).skip(qskip).limit(qlimit);
+        return rtrndata;
     }
 
     GetAllData() {

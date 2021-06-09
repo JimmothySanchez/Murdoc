@@ -36,23 +36,35 @@ export class MainComponent implements OnInit {
     if (this.electronService.isElectron) {
       this.electronService.ipcRenderer.on('update-data', (event, arg) => {
         console.log("Updating Data");
-        console.log(arg[0]);
-        console.log(arg[1]);
-        this.data.Files = arg[0];
-        this.data.TagOptions= arg[1];
-        this._cdr.detectChanges();
+        this.electronService.ipcRenderer.send('query-data',this.fileFilter);
+        this.electronService.ipcRenderer.send('query-tags');
+       // console.log(arg[0]);
+        //console.log(arg[1]);
+       // this.data.Files = arg[0];
+        //this.data.TagOptions= arg[1];
+        //this._cdr.detectChanges();
       });
       this.electronService.ipcRenderer.on('log', (event, arg) => {
         console.log(arg);
       });
+      this.electronService.ipcRenderer.on('tags-return', (event, arg) => {
+        this.data.TagOptions = arg;
+      });
+      this.electronService.ipcRenderer.on('query-return', (event, arg) => {
+        this.data.Files = arg;
+        this._cdr.detectChanges();
+      });
       this.electronService.ipcRenderer.send('init-ipc', 'ping');
+      //this.electronService.ipcRenderer.send('query-data',this.fileFilter);
     }
   }
 
   updateSearch(newSearch: string): void {
     this.fileFilter.Name = newSearch;
-    this._cdr.detectChanges();
+    this.electronService.ipcRenderer.send('query-data',this.fileFilter);
   }
+
+
 
   UpdateSelected(newSelected: i_File): void {
     this.selectedFile = newSelected;
@@ -62,17 +74,17 @@ export class MainComponent implements OnInit {
 
   UpdateSearchTags(tags: string[]): void {
     this.fileFilter.Tags = tags;
-    this._cdr.detectChanges();
+    this.electronService.ipcRenderer.send('query-data',this.fileFilter);
   }
 
   ngOnInit(): void {
-
+    
   }
 
   onPage(page: PageEvent): void {
     console.log(page);
     this.fileFilter.Page = page;
-    this._cdr.detectChanges();
+    this.electronService.ipcRenderer.send('query-data',this.fileFilter);
   }
 
 
