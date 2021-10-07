@@ -71,7 +71,7 @@ export class DataManager {
             this._config = <i_Configuration>JSON.parse(rawdata.toString());
         } catch (exception) {
             console.log("Could not find configuration. Making one instead.");
-            this._config = { filePaths: [], thumbPath: "", videoExtensions: [] ,simultaneousGenCount:3};
+            this._config = { filePaths: [], thumbPath: "", videoExtensions: [] ,simultaneousGenCount:3, dbLocation:""};
         }
     }
 
@@ -120,7 +120,13 @@ export class DataManager {
 
     LoadDb() {
         try {
-            this._dataStore = Datastore.create(this.GetDBPath());
+            let rawdata: Buffer = fs.readFileSync(path.resolve(this._root, this.GetDBPath()));
+            let videos = JSON.parse(rawdata.toString())["Videos"];
+            this._dataStore = Datastore.create();
+            this._dataStore.insert(videos,(err, newDocs)=>{
+                var crrapvar = "";
+            });
+            
         } catch (exception) {
             console.log("Could not load db");
         }
@@ -131,13 +137,15 @@ export class DataManager {
     }
 
     GetDBPath(): string {
-        return path.resolve(this._root, 'MurdocData.db');
+        //removed as part of v2
+        //return path.resolve(this._root, 'MurdocData.db');
+        return this._config.dbLocation;
     }
 
     QueryData(queryFilter) {
         let crapvar= "";
         let mongoFilter:any = {
-            Name: new RegExp(queryFilter.Name)
+            Name: new RegExp(queryFilter.Name,"i")
         };
         if(queryFilter.Tags.length>0)
         {
@@ -190,19 +198,19 @@ export class DataManager {
             if (filesWithoutThumbs.length > 0 && this._safeToGenerate) {
                 return new Promise((resolve, reject) => {
                     let file: i_File = filesWithoutThumbs.pop();
-                    let outPath = path.resolve(this._config.thumbPath, file.Id.toString() + '.png')
+                    let outPath = path.resolve(this._config.thumbPath, file.ID.toString() + '.png')
                     console.log('Generating thumbs for %s', file.Name);
-                    file.GeneratingThumb = true;
-                    this._dataStore.update({ Id: file.Id }, file, { upsert: true });
+                    //file.GeneratingThumb = true;
+                    this._dataStore.update({ Id: file.ID }, file, { upsert: true });
                     this._dataUpdater();
                     let startTime = performance.now();
-                    let temporaryDir = path.resolve(this._root, 'temp', file.Id);
+                    let temporaryDir = path.resolve(this._root, 'temp', file.ID);
                     thumbs.GenerateGalleryImage(file, outPath, temporaryDir).then((status) => {
                         console.log('Finished generating thumbs for %s after %s ms', file.Name, performance.now() - startTime);
-                        file.ThumbPath = outPath;
-                        file.GeneratingThumb = false;
+                        file.Thumbnail = outPath;
+                        //file.GeneratingThumb = false;
                         this._dataUpdater();
-                        this._dataStore.update({ Id: file.Id }, file, { upsert: true });
+                        this._dataStore.update({ Id: file.ID }, file, { upsert: true });
                         resolve(outPath);
                     }).catch(err => {
                         console.log(err);

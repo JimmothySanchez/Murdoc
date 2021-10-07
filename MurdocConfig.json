@@ -1,1 +1,14 @@
-{"filePaths":["J:\\MurdocSandbox\\Videos"],"thumbPath":"J:\\MurdocSandbox\\Thumbs","videoExtensions":[".mpeg",".avi",".mp4"],"simultaneousGenCount":"12","tempPath":"J:\\MurdocSandbox"}
+{
+    "dbLocation":"F:\\Projects\\MurdocUpdater\\murdocDB.json",
+    "filePaths": [
+        "J:\\MurdocSandbox\\Videos"
+    ],
+    "thumbPath": "J:\\MurdocSandbox\\Thumbs",
+    "videoExtensions": [
+        ".mpeg",
+        ".avi",
+        ".mp4"
+    ],
+    "simultaneousGenCount": "12",
+    "tempPath": "J:\\MurdocSandbox"
+}

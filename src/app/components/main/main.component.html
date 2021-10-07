@@ -8,9 +8,9 @@
     <mat-grid-tile [colspan]="6" [rowspan]="1">
       <app-file-search (UpdateSearch)="updateSearch($event)"></app-file-search>
     </mat-grid-tile>
-    <mat-grid-tile [colspan]="2" [rowspan]="1">
+    <!-- <mat-grid-tile [colspan]="2" [rowspan]="1">
       <button mat-button color="accent" (click)="OpenSettings()">Settings</button>
-    </mat-grid-tile>
+    </mat-grid-tile> -->
     <mat-grid-tile *ngIf="selectedFile !== null &&  selectedFile !== undefined" [colspan]="10" [rowspan]="7">
       <app-preview [dataRecord]="selectedFile"></app-preview>
     </mat-grid-tile>

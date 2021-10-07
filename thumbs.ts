@@ -147,7 +147,7 @@ export class Thumbs {
       this._MakeDirectory(tempDirectory).then((dirStatus) => {
         //Then generate temporary files
         //this._GenerateTempFiles(file.FullPath, tempDirectory).then((fileNames) => {
-        this._TakeFastShots(file.FullPath, tempDirectory, 0).then((fileNames) => {
+        this._TakeFastShots(file.Path, tempDirectory, 0).then((fileNames) => {
           //Then generate merge image
           this._CombineThumbs(fileNames, outPath).then((combineStatus) => {
             this._CleanUpTemporaryFiles(tempDirectory);

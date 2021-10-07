@@ -6,15 +6,23 @@ export interface i_MainSchema {
 }
 
 export interface i_File {
-    FullPath:string;
+    Path:string;
     Name:String;
-    Id:string;
-    ThumbPath?:string;
+    ID:string;
+    Thumbnail?:string;
     Tags:string[];
-    GeneratingThumb:boolean;
+    Meta:i_Meta
+}
+
+export interface i_Meta{
+    Codec?:string;
+    Resolution?:string;
+    Duration:number;
+    FileSize?:number;
 }
 
 export interface i_Configuration{
+    dbLocation:string;
     filePaths:string[];
     thumbPath:string;
     videoExtensions:string[];

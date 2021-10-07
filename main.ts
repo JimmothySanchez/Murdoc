@@ -119,15 +119,6 @@ function initMenu() {
       ]
     },
     {
-      label: 'Videos',
-      submenu: [
-        { label: 'Scan Files', click() { ScanDirectories(); } },
-        { label: 'Fix Names', click() { _dataManager.FixNames(); } },
-        { label: 'Start Generating Thumbs', click() { _dataManager.GenerateThumbs(); } },
-        { label: 'Stop Generating Thumbs', click() { _dataManager.StopGeneratingThumbs(); } },
-      ]
-    },
-    {
       label: 'Debug',
       submenu: [
         { label: 'Debug', click() { win.webContents.openDevTools(); } }

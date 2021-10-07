@@ -23,7 +23,6 @@ export class SearchPipe implements PipeTransform {
     } 
     if(pipeFilter.Page!==null&&pipeFilter.Page!==undefined )
     {
-  
       rtrnitems= rtrnitems.slice(pipeFilter.Page.pageSize*pipeFilter.Page.pageIndex,pipeFilter.Page.pageSize*(pipeFilter.Page.pageIndex+1))
     }
     return rtrnitems;

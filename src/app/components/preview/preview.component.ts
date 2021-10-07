@@ -12,7 +12,7 @@ export class PreviewComponent implements OnInit {
   constructor( private electronService: ElectronService ) { }
 
   LoadFile():void{
-    this.electronService.shell.openPath(this.dataRecord.FullPath);
+    this.electronService.shell.openPath(this.dataRecord.Path);
   }
   
   ngOnInit(): void {
